@@ -1,6 +1,6 @@
 ##########################################################
 #########################################################
-setwd("C:\\Users\\CSIV149\\PLC.lab.docs\\03.larry")
+setwd("C:\\PLC.lab.docs\\03.larry")
 library(tidyverse)
 library(DESeq2)
 library(export)
