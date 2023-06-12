@@ -1,14 +1,13 @@
 library(Seurat)
 library(cowplot)
 
-#绘制相关性图。
+#corr 
 #####################################################################################
-##colon cancer数据
+##colon cancer
 #####################################################################################
 setwd("C:/Users/CSIV149/PLC.lab.docs/03.larry/GSE140288_colonCancer_RAW/")
 immune.combined <- readRDS("S1andS2.merge.rds")
 
-#因为分不开，所以这个地方时用来分析报的res.
 immune.combined <- FindClusters(immune.combined, resolution = 1.2) #res的范围是0.5到1.2
 DimPlot(immune.combined, reduction = "umap",label = T)
 DimPlot(immune.combined, reduction = "umap",label = T, 
@@ -18,8 +17,8 @@ DimPlot(immune.combined, reduction = "umap",label = T,
 
 levels(immune.combined)
 
-#根据两篇文章的信息，得到了每个亚群的分群信息
-#内皮细胞包括stem, TA, Tuft, Enterocyte, 9_Goblet
+#on the basis of reference.
+#stem, TA, Tuft, Enterocyte, 9_Goblet
 
 #Stem: "LGR5"
 FeaturePlot(immune.combined, features = c("LGR5")) #0,5,11 "stem"
@@ -41,11 +40,11 @@ FeaturePlot(immune.combined, features = c("FABP1")); #27,22,19,3,1,6,24
 FeaturePlot(immune.combined, features = c("APOB"));#4,8,14,20
 FeaturePlot(immune.combined, features = c("APOA1")) #10,13
 
-#其他的细胞：
+
 #Paneth: "DEFA6"
 FeaturePlot(immune.combined, features = c("DEFA6"))#21
 #Endocrine: "CHGB"
-FeaturePlot(immune.combined, features = c("CHGB"))# 分不出来，不要了。
+FeaturePlot(immune.combined, features = c("CHGB"))
 #Mcell: "SPIB" , "BEST4"
 FeaturePlot(immune.combined, features = c("SPIB"));
 FeaturePlot(immune.combined, features = c("BEST4")) #15
@@ -70,14 +69,14 @@ colon.epthi <- immune.combined[,immune.combined@meta.data$seurat_clusters
 genes_isg = c("IRF7","IFIT1","ISG15","STAT1","IFITM3","IFI44","TGTP1","IFNB1")
 colon.epthi = ScaleData(colon.epthi, assay = "RNA", features = genes_isg, do.center = T, do.scale = T)
 colon.epthi@meta.data$ISG_score = colMeans(colon.epthi[["RNA"]]@scale.data)
-##在同一张图上同时展示两个基因的表达量。
+##
 FeaturePlot(colon.epthi, 
             features = c("ISG_score","DDX6"), 
             cols=c("white","darkorange3","blue"), pt.size = 3.0,
-            blend=T,order = T) #order是让表达基因的细胞放在上面。
+            blend=T,order = T) #order
 
 ############################################################
-##这个是用来计算ISG和DDX6表达量相关性的数据。
+##calculate corr
 ##############################################################
 setwd("C:/Users/CSIV149/PLC.lab.docs/03.larry/GSE140288_colonCancer_RAW/")
 immune.combined <- readRDS("S1andS2.merge.rds")
@@ -85,7 +84,7 @@ colon.epthi <- immune.combined[,immune.combined@meta.data$seurat_clusters %in% c
 genes_isg = c("IRF7","IFIT1","ISG15","STAT1","IFITM3","IFI44","TGTP1","IFNB1")
 #colon.epthi = ScaleData(colon.epthi, assay = "integrated", features = genes_isg, do.center = T, do.scale = T)
 #colon.epthi@meta.data$ISG_score = colMeans(colon.epthi[["integrated"]]@scale.data)
-#对于HCC样本，这里没有integrated，所需要使用RNA。
+。
 colon.epthi = ScaleData(colon.epthi, assay = "RNA", features = genes_isg, do.center = T, do.scale = T)
 colon.epthi@meta.data$ISG_score = colMeans(colon.epthi[["RNA"]]@scale.data)
 
@@ -97,7 +96,7 @@ head(isg.dat)
 colnames(isg.dat)[1] <- "ISG"
 class(isg.dat)
 
-##DDX6的表达量
+##DDX6 expression
 FeaturePlot(colon.epthi, features = "DDX6", label = F, reduction = "umap")
 ddx6 = c("DDX6")
 colon.epthi = ScaleData(colon.epthi, assay = "RNA", features = ddx6, do.center = T, do.scale = T)
@@ -112,7 +111,7 @@ colnames(ddx6.dat)[1] <- "DDX6"
 dat <- cbind(isg.dat, ddx6.dat)
 dat[1:5,1:2]
 
-#查看表达量的分布
+#distribution of expression
 ggplot(dat,aes(x=ISG))+
   geom_histogram(position = "identity",fill="lightcoral",color="black",bins=500,alpha=0.5)
 
@@ -121,14 +120,14 @@ ggplot(dat,aes(x=DDX6))+
 
 
 #######################################################################
-##找到数据当中的众数，返回众数的次数
+##mode of DDX6
 mode.ddx6 <- as.numeric(names(table(dat$DDX6))[table(dat$DDX6) == max(table(dat$DDX6))])
 max(table(dat$DDX6))
 
 mode.isg <- as.numeric(names(table(dat$ISG))[table(dat$ISG) == max(table(dat$ISG))])
 max(table(dat$ISG))
 
-##将两者都低表达的细胞删掉
+##delete low expression cells
 dat.median.ddx6 <- quantile(dat$DDX6,0.25); dat.median.isg <- quantile(dat$ISG,0.25)
 dat.test1 <- subset(dat, dat$DDX6 < dat.median.ddx6+0.001)
 dat.test2 <- subset(dat, dat$ISG < dat.median.isg+0.001)
@@ -138,7 +137,7 @@ venn.diagram(list(dat.test1=dat.test1,dat.test2=dat.test2),
              filename = "VennDiagram.tif")
 
 
-##提取重叠的细胞，即不表达的细胞，然后用表达的细胞来绘图。
+##
 dat.noExpress <- merge(dat.test1, dat.test2, by = 'row.names', all = F)
 head(dat.noExpress)
 dat.noExpress.names <- c(dat.noExpress$Row.names)
@@ -149,16 +148,14 @@ dat <- dat.hiExpre
 #library(stringr)
 #str_match_all(dat.test1,dat.test2)
 
-##区分高表达和低表达的基因
+##
 #dat.median <- median(dat$DDX6)
 #min(dat$DDX6)
 
 dat.median.low <- quantile(dat$DDX6,0.05)#dat.median.isg <- quantile(dat$ISG,0.25)
 dat.median.hig <- quantile(dat$DDX6,0.95)
 class(dat.median)
-#这里有个问题，就是均值和中位数都会导致ESCC的分组差别很大。
-#根据查资料结果，以及数据分布结果发现ESCC的数据偏左，众数区分更加具有说服力。
-#所以计算众数。变量不变了，后面的代码懒得修改。
+
 #getmode <- function(v) {
 uniqv <- unique(v)
 uniqv[which.max(tabulate(match(v, uniqv)))]
@@ -166,10 +163,10 @@ uniqv[which.max(tabulate(match(v, uniqv)))]
 # Calculate the mode using the user function.
 #dat.median <- getmode(dat$DDX6)
 
-#提取后添加组别信息。
-low.dat <-subset(dat, dat$DDX6 <= dat.median.low)#小于0.25分位的是低表达的
+
+low.dat <-subset(dat, dat$DDX6 <= dat.median.low)
 max(low.dat$DDX6)
-hig.dat <-subset(dat, dat$DDX6>=dat.median.hig)#大于0.75分位的属于高表达的基因
+hig.dat <-subset(dat, dat$DDX6>=dat.median.hig)#
 max(dat$DDX6)
 
 
@@ -185,14 +182,13 @@ library(ggsignif)
 #install.packages('ggpubr')
 library(ggpubr)
 library(export)
-#因为数据在进行显著性检测之前，需要判断检测方法。
-#检测数据是否符合正态分布
+
 shapiro.test(dat.new$ISG)
 ggqqplot(dat.new$ISG)
 ggdensity(dat.new$ISG)
 wilcox.test(hig.dat$ISG, low.dat$ISG)
 
-##这里画图不可以使用log进行转换，因为表达量大部分是负数，log转换之后是空值。
+
 table(dat.new$group)
 ggplot(dat.new, aes(x = dat.new$group, y = dat.new$ISG)) +
   geom_violin(trim = FALSE, aes(fill = group)) +
@@ -209,7 +205,7 @@ ggplot(dat.new, aes(x = dat.new$group, y = dat.new$ISG)) +
 graph2ppt(file="colon_DDX2ISG_corr_deletLowCells.pptx", width=8, aspectr=1.0)
 
 #####################################################################################
-##ESCC 数据
+##ESCC
 #####################################################################################
 setwd("C:\\Users\\CSIV149\\PLC.lab.docs\\03.larry\\GSE188900_scESCC_RAW")
 immune.combined <- readRDS("ESCC.patients.merge.rds")
@@ -263,15 +259,15 @@ genes_isg = c("IRF7","IFIT1","ISG15","STAT1","IFITM3","IFI44","TGTP1","IFNB1")
 escc.epthi = ScaleData(escc.epthi, assay = "RNA", features = genes_isg, do.center = T, do.scale = T)
 escc.epthi@meta.data$ISG_score = colMeans(escc.epthi[["RNA"]]@scale.data)
 isg.dat <- escc.epthi[['ISG_score']]
-##在同一张图上同时展示两个基因的表达量。
+
 FeaturePlot(escc.epthi, 
             features = c("ISG_score","DDX6"), 
             cols=c("white","darkorange3","blue"), pt.size = 3.0,
-            blend=T,order = T) #order是让表达基因的细胞放在上面。
+            blend=T,order = T) 
 
 
 ############################################################
-##用于画图的
+##
 ###################################################
 setwd("C:\\Users\\CSIV149\\PLC.lab.docs\\03.larry\\GSE188900_scESCC_RAW")
 immune.combined <- readRDS("ESCC.patients.merge.rds")
@@ -279,9 +275,7 @@ DimPlot(immune.combined, reduction = "umap",label = T)
 escc.epthi <- immune.combined[,immune.combined@meta.data$seurat_clusters %in% c(2,6,9,10)]
 
 genes_isg = c("IRF7","IFIT1","ISG15","STAT1","IFITM3","IFI44","TGTP1","IFNB1")
-#escc.epthi = ScaleData(escc.epthi, assay = "integrated", features = genes_isg, do.center = T, do.scale = T)
-#escc.epthi@meta.data$ISG_score = colMeans(escc.epthi[["integrated"]]@scale.data)
-#对于HCC样本，这里没有integrated，所需要使用RNA。
+
 escc.epthi = ScaleData(escc.epthi, assay = "RNA", features = genes_isg, do.center = T, do.scale = T)
 escc.epthi@meta.data$ISG_score = colMeans(escc.epthi[["RNA"]]@scale.data)
 
@@ -292,7 +286,7 @@ isg.dat <- escc.epthi[['ISG_score']]
 head(isg.dat)
 colnames(isg.dat)[1] <- "ISG"
 class(isg.dat)
-##DDX6的表达量
+
 escc.epthi <- immune.combined[,immune.combined@meta.data$seurat_clusters %in% c(2,6,9,10)]
 FeaturePlot(escc.epthi, features = "DDX6", label = F, reduction = "umap")
 ddx6 = c("DDX6")
@@ -308,21 +302,21 @@ colnames(ddx6.dat)[1] <- "DDX6"
 dat <- cbind(isg.dat, ddx6.dat)
 dat[1:5,1:2]
 
-#查看表达量的分布
+
 ggplot(dat,aes(x=ISG))+
   geom_histogram(position = "identity",fill="lightcoral",color="black",bins=500,alpha=0.5)
 
 ggplot(dat,aes(x=DDX6))+
   geom_histogram(position = "identity",fill="lightcoral",color="black",bins=500,alpha=0.5)
 #######################################################################
-##找到数据当中的众数，返回众数的次数
+##
 as.numeric(names(table(dat$DDX6))[table(dat$DDX6) == max(table(dat$DDX6))])
 max(table(dat$DDX6))
 
 as.numeric(names(table(dat$ISG))[table(dat$ISG) == max(table(dat$ISG))])
 max(table(dat$ISG))
 
-##将两者都低表达的细胞删掉
+
 dat.median.ddx6 <- quantile(dat$DDX6,0.25); dat.median.isg <- quantile(dat$ISG,0.25)
 dat.test1 <- subset(dat, dat$DDX6 < dat.median.ddx6+0.001)
 dat.test2 <- subset(dat, dat$ISG < dat.median.isg+0.001)
@@ -332,7 +326,7 @@ venn.diagram(list(dat.test1=dat.test1,dat.test2=dat.test2),
              filename = "VennDiagram.tif")
 
 
-##提取重叠的细胞，即不表达的细胞，然后用表达的细胞来绘图。
+
 dat.noExpress <- merge(dat.test1, dat.test2, by = 'row.names', all = F)
 head(dat.noExpress)
 dat.noExpress.names <- c(dat.noExpress$Row.names)
@@ -343,16 +337,14 @@ dat <- dat.hiExpre
 #library(stringr)
 #str_match_all(dat.test1,dat.test2)
 
-##区分高表达和低表达的基因
+
 #dat.median <- median(dat$DDX6)
 #min(dat$DDX6)
 
 dat.median.low <- quantile(dat$DDX6,0.05)#dat.median.isg <- quantile(dat$ISG,0.25)
 dat.median.hig <- quantile(dat$DDX6,0.95)
 class(dat.median)
-#这里有个问题，就是均值和中位数都会导致ESCC的分组差别很大。
-#根据查资料结果，以及数据分布结果发现ESCC的数据偏左，众数区分更加具有说服力。
-#所以计算众数。变量不变了，后面的代码懒得修改。
+
 #getmode <- function(v) {
 uniqv <- unique(v)
 uniqv[which.max(tabulate(match(v, uniqv)))]
@@ -360,7 +352,7 @@ uniqv[which.max(tabulate(match(v, uniqv)))]
 # Calculate the mode using the user function.
 #dat.median <- getmode(dat$DDX6)
 
-#提取后添加组别信息。
+
 low.dat <-subset(dat, dat$DDX6 <= dat.median.low)#小于0.25分位的是低表达的
 max(low.dat$DDX6)
 hig.dat <-subset(dat, dat$DDX6>=dat.median.hig)#大于0.75分位的属于高表达的基因
@@ -379,8 +371,7 @@ library(ggsignif)
 #install.packages('ggpubr')
 library(ggpubr)
 library(export)
-#因为数据在进行显著性检测之前，需要判断检测方法。
-#检测数据是否符合正态分布
+
 shapiro.test(dat.new$ISG)
 ggqqplot(dat.new$ISG)
 ggdensity(dat.new$ISG)
@@ -481,21 +472,21 @@ names(new.cluster.id) <- levels(immune.combined)
 immune.combined <- RenameIdents(immune.combined, new.cluster.id)
 DimPlot(immune.combined, reduction = "umap",label = T, pt.size = 1.5)
 
-#筛选出hepato细胞
+#hepato cells
 hcc.epthi <- immune.combined[,immune.combined@meta.data$seurat_clusters 
                               %in% c(15,8,16,22,10,12,21,2,11)]
 genes_isg = c("IRF7","IFIT1","ISG15","STAT1","IFITM3","IFI44","TGTP1","IFNB1")
 hcc.epthi = ScaleData(hcc.epthi, assay = "RNA", features = genes_isg, do.center = T, do.scale = T)
 hcc.epthi@meta.data$ISG_score = colMeans(hcc.epthi[["RNA"]]@scale.data)
 isg.dat <- hcc.epthi[['ISG_score']]
-##在同一张图上同时展示两个基因的表达量。
+
 FeaturePlot(hcc.epthi, 
             features = c("ISG_score","DDX6"), 
             cols=c("white","darkorange3","blue"), pt.size = 3.0,
-            blend=T,order = T) #order是让表达基因的细胞放在上面。
+            blend=T,order = T) 
 
 ######################################################
-##画相关性图的脚本。
+##
 ####################################################
 setwd("C:\\Users\\CSIV149\\PLC.lab.docs\\03.larry\\GSE156625_HCC")
 immune.combined <- readRDS("HCC.patients.merge.rds")
@@ -503,7 +494,7 @@ DimPlot(immune.combined, reduction = "umap",label = T)
 
 hcc.epthi <- immune.combined[,immune.combined@meta.data$seurat_clusters %in% c(2,5,6,9,10,11)]
 genes_isg = c("IRF7","IFIT1","ISG15","STAT1","IFITM3","IFI44","TGTP1","IFNB1")
-#对于HCC样本，这里没有integrated，所需要使用RNA。
+
 hcc.epthi = ScaleData(hcc.epthi, assay = "RNA", features = genes_isg, do.center = T, do.scale = T)
 hcc.epthi@meta.data$ISG_score = colMeans(hcc.epthi[["RNA"]]@scale.data)
 
@@ -514,7 +505,7 @@ isg.dat <- hcc.epthi[['ISG_score']]
 head(isg.dat)
 colnames(isg.dat)[1] <- "ISG"
 class(isg.dat)
-##DDX6的表达量
+##DDX6
 hcc.epthi <- immune.combined[,immune.combined@meta.data$seurat_clusters %in% c(2,5,6,9,10,11)]
 FeaturePlot(hcc.epthi, features = "DDX6", label = F, reduction = "umap")
 ddx6 = c("DDX6")
@@ -532,23 +523,15 @@ head(dat)
 #write.csv(dat,"hcc_dat.csv",quote = F)
 
 #########################################################
-##因为数据的分布呈现超级偏态分布，所以需要确定低表达这些细胞是否是DDX6和ISG同时低表达？
 ########################################################################################
 
-
-#查看表达量的分布
 ggplot(dat,aes(x=DDX6))+
   geom_histogram(position = "identity",fill="lightcoral",color="black",bins=500,alpha=0.5)
 
 ggplot(dat,aes(x=ISG))+
   geom_histogram(position = "identity",fill="lightcoral",color="black",bins=500,alpha=0.5)
 
-#dat$log.ISG <- log10(abs(dat$ISG))
-#dat$log.DDX6 <- log10(abs(dat$DDX6))
-#dat <- subset(dat, dat$log.ISG!="NaN" & dat$log.DDX6!="NaN" )
-#dat[is.na(dat)] <- 0
-##
-##因为上述提取的数据里面存在负值，所以需要采用box-cox转换。
+
 library(MASS)
 #dat$number <- c(1:25792)
 #head(dat)
@@ -556,19 +539,16 @@ library(MASS)
 #res2<-lm.sales1$residual 
 #hist(res2)
 
-#b2=boxcox(DDX6~number, data=dat) # 定义函数类型和数据
-#I=which(b2$y==max(b2$y))
-#b2$x[I]
 
 #######################################################################
-##找到数据当中的众数，返回众数的次数
+##
 as.numeric(names(table(dat$DDX6))[table(dat$DDX6) == max(table(dat$DDX6))])
 max(table(dat$DDX6))
 
 as.numeric(names(table(dat$ISG))[table(dat$ISG) == max(table(dat$ISG))])
 max(table(dat$ISG))
 
-##将两者都低表达的细胞删掉
+##
 dat.median.ddx6 <- quantile(dat$DDX6,0.25); dat.median.isg <- quantile(dat$ISG,0.25)
 dat.test1 <- subset(dat, dat$DDX6 < dat.median.ddx6+0.001)
 dat.test2 <- subset(dat, dat$ISG < dat.median.isg+0.001)
@@ -578,7 +558,7 @@ venn.diagram(list(dat.test1=dat.test1,dat.test2=dat.test2),
              filename = "VennDiagram.tif")
 
 
-##提取重叠的细胞，即不表达的细胞，然后用表达的细胞来绘图。
+##
 dat.noExpress <- merge(dat.test1, dat.test2, by = 'row.names', all = F)
 head(dat.noExpress)
 dat.noExpress.names <- c(dat.noExpress$Row.names)
@@ -596,9 +576,7 @@ min(dat$DDX6)
 dat.median.low <- quantile(dat$DDX6,0.05)#dat.median.isg <- quantile(dat$ISG,0.25)
 dat.median.hig <- quantile(dat$DDX6,0.95)
 class(dat.median)
-#这里有个问题，就是均值和中位数都会导致ESCC的分组差别很大。
-#根据查资料结果，以及数据分布结果发现ESCC的数据偏左，众数区分更加具有说服力。
-#所以计算众数。变量不变了，后面的代码懒得修改。
+
 #getmode <- function(v) {
 uniqv <- unique(v)
 uniqv[which.max(tabulate(match(v, uniqv)))]
@@ -606,10 +584,9 @@ uniqv[which.max(tabulate(match(v, uniqv)))]
 # Calculate the mode using the user function.
 #dat.median <- getmode(dat$DDX6)
 
-#提取后添加组别信息。
-low.dat <-subset(dat, dat$DDX6 <= dat.median.low)#小于0.25分位的是低表达的
-max(low.dat$DDX6)
-hig.dat <-subset(dat, dat$DDX6>=dat.median.hig)#大于0.75分位的属于高表达的基因
+#
+low.dat <-subset(dat, dat$DDX6 <= dat.median.low)#
+hig.dat <-subset(dat, dat$DDX6>=dat.median.hig)#
 max(dat$DDX6)
 
 hig.dat$group <- "DDX6_high"
@@ -624,8 +601,7 @@ library(ggsignif)
 #install.packages('ggpubr')
 library(ggpubr)
 library(export)
-#因为数据在进行显著性检测之前，需要判断检测方法。
-#检测数据是否符合正态分布
+
 shapiro.test(dat.new$ISG)
 ggqqplot(dat.new$ISG)
 ggdensity(dat.new$ISG)
@@ -645,5 +621,4 @@ ggplot(dat.new, aes(x = dat.new$group, y = dat.new$ISG)) +
 #             geom="pointrange", color = "black")+
 
 graph2ppt(file="hcc_DDX2ISG_corr_deletLowCells.pptx", width=8, aspectr=1.0)
-a
 
