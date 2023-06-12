@@ -2,9 +2,8 @@ library(magrittr)
 library(dplyr)
 ## plotting 119 A:C, 322 A:U and 184 non-A:C non-A:U sites together in one figure
 # A-U and A-C binding maps ploting with density plot
-setwd("C:/Users/CSIV149/PLC.lab.docs/03.larry/DDX6_un-regulated_EditingSites_RX")
-
 WD <- getwd()
+
 df1 = read.delim(paste0(WD, "/DDX6_editing_candidates.overlppaped_with_eCLIP_IgG.output.txt.output"), stringsAsFactors = F, header = F, check.names = F)
 df2 = read.delim(paste0(WD, "/DDX6_editing_candidates.overlppaped_with_eCLIP_XL1.output.txt.output"), stringsAsFactors = F, header = F, check.names = F)
 df3 = read.delim(paste0(WD, "/DDX6_editing_candidates.overlppaped_with_eCLIP_XL2.output.txt.output"), stringsAsFactors = F, header = F, check.names = F)
@@ -67,9 +66,9 @@ legend(-1000,1,
        col=c("#00BFC4", "#F8766D"), 
        box.lty = 0)
 
-#graph2ppt(file="DDX6_peakDensity_of_regulated_and_unregulated_sites.pptx", width=8, aspectr=1.0)
 
-
+#################################################################
+###################################################################
 WD <- getwd()
 df1 = read.delim(paste0(WD, "/DHX9_editing_candidates.overlppaped_with_eCLIP_IgG.output.txt.output"), stringsAsFactors = F, header = F, check.names = F)
 df2 = read.delim(paste0(WD, "/DHX9_editing_candidates.overlppaped_with_eCLIP_XL1.output.txt.output"), stringsAsFactors = F, header = F, check.names = F)
@@ -122,7 +121,7 @@ legend(-4000,1,
        lwd=c(3,3), 
        col=c("#00BFC4", "#F8766D"), 
        box.lty = 0)
-graph2ppt(file="DHX9_peakDensity_of_regulated_and_unregulated_sites_XL1.pptx", width=8, aspectr=1.0)
+
 
 
 #XL2
@@ -137,7 +136,7 @@ legend(-4000,1,
        lwd=c(3,3), 
        col=c("#00BFC4", "#F8766D"), 
        box.lty = 0)
-graph2ppt(file="DHX9_peakDensity_of_regulated_and_unregulated_sites_XL2.pptx", width=8, aspectr=1.0)
+
 
 
 
