@@ -1,12 +1,12 @@
 ##########################################################
-##2023年2月10日
-##因为之前的绘图结果没有考虑strand的信息，所以考虑之后重新画图。
+##2023.2.10.
+##with strand inforamtion
 #################################################################
 ##################################################################
 setwd("C:\\Users\\CSIV149\\PLC.lab.docs\\03.larry\\DDX6data.LarrySend\\DDX6_DHX9_DDX21_DDX3_peakDensity_and_peakDistance")
 library(ggplot2)
 library(export)
-##绘制小提琴图
+##vilion plot
 #ddx6
 ddx6.xl1 <- read.csv("DDX6_distanceEditing2EclipPeak_XL1_new.strand.txt",header = T)
 ddx6.xl2 <- read.csv("DDX6_distanceEditing2EclipPeak_XL2_new.strand.txt",header = T)
@@ -48,14 +48,13 @@ head(ddx21.dist)
 max(ddx21.dist$Dsitance.nt.)
 ddx21.dist$sample <- c(rep("DDX21",nrow(ddx21.dist)))
 
-#合并
+#merge
 dist.all <- rbind(ddx6.dist,ddx3x.dist,dhx9.dist,ddx21.dist)
 head(dist.all)
-#绘图
+#plotting
 library(ggplot2)
 library(export)
-#mpg数据集绘制
-#mpg$class = with(mpg, reorder(class, hwy, median))
+
 #######################################
 ggplot(dist.all) + 
   geom_violin(aes(x=sample, y=Dsitance.nt., fill=group), trim = T) +
