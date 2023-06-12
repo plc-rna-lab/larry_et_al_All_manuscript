@@ -112,8 +112,7 @@ immune.combined <- stim
 remove(stim)
 
 ##################################################################################
-##去批次。。
-##接下来就是Seurat去批次效应的标准流程
+#merge data
 immune.anchors <- FindIntegrationAnchors(object.list = list(p1,p2,p3,p4,p5,p6.1,p6.2), dims = 1:10)
 immune.combined <- IntegrateData(anchorset = immune.anchors, dims = 1:10)
 
@@ -129,7 +128,6 @@ immune.combined <- FindClusters(immune.combined, resolution = 0.3)
 immune.combined <- RunUMAP(immune.combined, dims = 1:20)
 immune.combined <- RunTSNE(immune.combined, dims = 1:20)
 
-#保存处理完的数据。
 saveRDS(immune.combined, file = "S1andS2.merge.rds")
 saveRDS(immune.combined, file = "ESCC.patients.merge.rds")
 saveRDS(immune.combined, file = "HCC.patients.merge.rds")
@@ -140,13 +138,13 @@ p2 <- DimPlot(immune.combined, reduction = "umap", label = TRUE)
 plot_grid(p1, p2)
 
 
-#绘制相关性图。
+#corr plotting
 immune.combined <- readRDS("ESCC.patients.merge.rds")
 genes_isg = c("IRF7","IFIT1","ISG15","STAT1","IFITM3","IFI44","TGTP1","IFNB1")
 
 immune.combined = ScaleData(immune.combined, assay = "integrated", features = genes_isg, do.center = T, do.scale = T)
 immune.combined@meta.data$ISG_score = colMeans(immune.combined[["integrated"]]@scale.data)
-#对于HCC样本，这里没有integrated，所需要使用RNA。
+#for HCC, it is differnet.
 immune.combined = ScaleData(immune.combined, assay = "RNA", features = genes_isg, do.center = T, do.scale = T)
 immune.combined@meta.data$ISG_score = colMeans(immune.combined[["RNA"]]@scale.data)
 
@@ -184,7 +182,7 @@ ggscatterstats(dat,
                title = "Relationship between ISG and DDX6")
 
 
-#将DDX的表达量按照中位数分为高和低。
+#get DDX6 high and DDX6 low group
 #dat.median <- median(dat$DDX6)
 #hig.dat <-subset(dat, dat$DDX6>dat.median)
 #low.dat <-subset(dat, dat$DDX6<=dat.median)
@@ -216,12 +214,10 @@ ggscatterstats(dat,
 
 
 
-##按照中位数将DDX6的表达数值分为高表达和低表达，然后绘制小提琴图，并且添加显著性检测。
+##get DDX6 high and DDX6 low expression by using median of expression.
 dat.median <- median(dat$DDX6)
 dat.median <- mean(dat$DDX6)
-#这里有个问题，就是均值和中位数都会导致ESCC的分组差别很大。
-#根据查资料结果，以及数据分布结果发现ESCC的数据偏左，众数区分更加具有说服力。
-#所以计算众数。变量不变了，后面的代码懒得修改。
+##function
 getmode <- function(v) {
   uniqv <- unique(v)
   uniqv[which.max(tabulate(match(v, uniqv)))]
@@ -229,7 +225,6 @@ getmode <- function(v) {
 # Calculate the mode using the user function.
 dat.median <- getmode(dat$DDX6)
 
-#提取后添加组别信息。
 hig.dat <-subset(dat, dat$DDX6>dat.median)
 low.dat <-subset(dat, dat$DDX6<=dat.median)
 
@@ -244,8 +239,7 @@ library(ggsignif)
 #install.packages('ggpubr')
 library(ggpubr)
 
-#因为数据在进行显著性检测之前，需要判断检测方法。
-#检测数据是否符合正态分布
+#significant test
 shapiro.test(dat.new$ISG)
 ggqqplot(dat.new$ISG)
 ggdensity(dat.new$ISG)
@@ -265,10 +259,8 @@ ggplot(dat.new, aes(x = dat.new$group, y = dat.new$ISG)) +
 
 
 #######################################################################
-##存在一个问题，就是现在这个结果和corrlation的结果不太对应。
-##所以单独将高表达DDX6的细胞再次取出来。然后绘制表达图。
 ####################################################################
-#上面已经得到的高表达数据。
+#
 hig.dat <-subset(dat, dat$DDX6>dat.median)
 dat.new.median <- median(hig.dat$DDX6)
 
@@ -292,25 +284,6 @@ ggplot(dat.new.new, aes(x = dat.new.new$group, y = dat.new.new$ISG)) +
   stat_summary(fun.data="mean_sdl", fun.args = list(mult=1),
                geom="pointrange", color = "black")+
   theme_classic()
-#######################
-##结果，对于colon cancer,更加不明显。
-##对于HCC， 
-##对于ESCC
-################
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -362,8 +335,7 @@ p6.normal <- subset(p6.normal, subset = nFeature_RNA > 100 & nFeature_RNA < 5000
   FindVariableFeatures(selection.method = "vst", nfeatures = 2000)
 
 ##################################################################################
-##去批次。。
-##接下来就是Seurat去批次效应的标准流程
+
 immune.anchors <- FindIntegrationAnchors(object.list = list(p6.1,p6.2,p6.normal), dims = 1:10)
 immune.combined <- IntegrateData(anchorset = immune.anchors, dims = 1:10)
 
@@ -379,13 +351,12 @@ immune.combined <- FindClusters(immune.combined, resolution = 0.3)
 immune.combined <- RunUMAP(immune.combined, dims = 1:20)
 immune.combined <- RunTSNE(immune.combined, dims = 1:20)
 
-#保存处理完的数据。
+
 saveRDS(immune.combined, file = "ESCC.patient6.cancerNormal.merged.rds")
 
 # Visualization
 DimPlot(immune.combined, reduction = "umap", group.by = "stim")
 
-#提取ISGscore和DDX6的表达量。
 immune.combined <- readRDS("ESCC.patient6.cancerNormal.merged.rds")
 
 exprs <- data.frame(FetchData(object = immune.combined, vars = c("stim", "DDX6")))
@@ -393,12 +364,9 @@ head(exprs)
 table(exprs$stim)
 exprs$stim[which(exprs$stim =='p6.1')] <- 'p6.2'
 
-#提取后添加组别信息。
 cancer.dat <-subset(exprs, exprs$stim=="p6.2")
 normal.dat <-subset(exprs, exprs$stim=="p6.normal")
 
-#因为数据在进行显著性检测之前，需要判断检测方法。
-#检测数据是否符合正态分布
 shapiro.test(dat.new$ISG)
 ggqqplot(dat.new$ISG)
 ggdensity(dat.new$ISG)
