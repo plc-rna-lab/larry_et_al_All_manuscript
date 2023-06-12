@@ -20,9 +20,7 @@ df3 = df3%>% mutate(density = V3/max)
 smoothingSpline1 = smooth.spline(df1$V2, df1$density, spar=0.15)
 smoothingSpline2 = smooth.spline(df2$V2, df2$density, spar=0.15)
 smoothingSpline3 = smooth.spline(df3$V2, df3$density, spar=0.15)
-# plot(smoothingSpline1, ylim = c(0,1), xlim = c(-1000, 1000), type = "l", col="black", lwd=2, xlab="Relative position to 119 A:C mismatches", ylab="DDX6 eCLIP peak density")
-# lines(smoothingSpline2, col="orange", lwd=2)
-# lines(smoothingSpline3, col="dark blue", lwd=2)
+
 
 DDX6_eCLIP_XL1_3UTR <- smoothingSpline2
 DDX6_eCLIP_XL2_3UTR <- smoothingSpline3
@@ -89,9 +87,7 @@ df3 = df3%>% mutate(density = V3/max)
 smoothingSpline1 = smooth.spline(df1$V2, df1$density, spar=0.15)
 smoothingSpline2 = smooth.spline(df2$V2, df2$density, spar=0.15)
 smoothingSpline3 = smooth.spline(df3$V2, df3$density, spar=0.15)
-# plot(smoothingSpline1, ylim = c(0,1), xlim = c(-1000, 1000), type = "l", col="black", lwd=2, xlab="Relative position to 119 A:C mismatches", ylab="DHX9 eCLIP peak density")
-# lines(smoothingSpline2, col="orange", lwd=2)
-# lines(smoothingSpline3, col="dark blue", lwd=2)
+
 
 DHX9_eCLIP_XL1_3UTR <- smoothingSpline2
 DHX9_eCLIP_XL2_3UTR <- smoothingSpline3
@@ -134,8 +130,6 @@ legend(-1000,1,
        c("3'UTR sites(XL2)", "Intronic sites(XL2)"), 
        lwd=c(2,2), col=c("dark blue", "orange"), box.lty = 0)
 
-graph2ppt(file="DHX9_3UTRcompareINtronic.peakDensity_XL1.pptx",width=8,aspectr=1.2)
-graph2ppt(file="DHX9_3UTRcompareINtronic.peakDensity_XL2.pptx",width=8,aspectr=1.2)
 
 
 
