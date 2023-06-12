@@ -2,7 +2,6 @@ library(magrittr)
 library(dplyr)
 ## plotting 119 A:C, 322 A:U and 184 non-A:C non-A:U sites together in one figure
 # A-U and A-C binding maps ploting with density plot
-setwd("C:/Users/CSIV149/PLC.lab.docs/03.larry/DDX6data.LarrySend/XJH_result_usingRXscript")
 WD <- getwd()
 
 df1 = read.delim(paste0(WD, "/DDX6_editing_candidates.overlppaped_with_DDX6_eCLIP_IgG_3UTR.output.txt.output"), stringsAsFactors = F, header = F, check.names = F)
