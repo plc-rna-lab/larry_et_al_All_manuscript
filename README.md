@@ -4,7 +4,7 @@
 
 00.3UTRcompareINtronic.peakDensity_boxPlot_XL1_XL2.XJH.R: Script for drawing box plot of 3'UTR and intron of editing sites.
 
-00.DDX6_and_DHX9_peakDensity_of_regulated_and_unregulated_sites.XJH.R: Script for drawing peak density plot of DDX6 regulated and un-regulated sites of DDX6 and DHX9.
+00.DDX6_peakDensity_of_regulated_and_unregulated_sites.XJH.R: Script for drawing peak density plot of DDX6 regulated and un-regulated sites of DDX6.
 
 00.DEseq2.XJH.r: Script for analyzing bulk RNA seq data.
 
