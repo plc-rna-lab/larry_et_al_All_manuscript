@@ -8,11 +8,10 @@
 
 00.DEseq2.XJH.r: Script for analyzing bulk RNA seq data.
 
-00.DHX9_peakDensity_of_regulated_and_unregulated_sites_boxplot.XJH.R: Script for drawing box plot of DDX6 regulated and un-regulated sites of DDX6 and DHX9.
 
 00.MetaPlot_forAllHelicases.XJH.r: Script for analyzing metagene data.
 
-00.density_plot_XL1_XL2_500_-4000to4000.XJH.R: Script for drawing peak density plot for DDX6, DHX9, DDX3X and DDX21.
+00.density_plot_XL1_XL2_500_-4000to4000.XJH.R: Script for drawing peak density plot for DDX6, DDX3X and DDX21.
 
 00.mergeScData.XJH.R: Script for analyzing single-cell data donwnloaded from GEO database.
 
